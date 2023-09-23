@@ -17,7 +17,7 @@ class CryptoList extends StatefulWidget {
 class _CryptoListState extends State<CryptoList> {
   // List to store cryptocurrencies
   List<Crypto>? cryptolists;
-
+  bool isVisibleUpdating = false;
   @override
   void initState() {
     super.initState();
@@ -62,6 +62,14 @@ class _CryptoListState extends State<CryptoList> {
                   filled: true,
                   fillColor: greyColor,
                 ),
+              ),
+            ),
+            Visibility(
+              visible: isVisibleUpdating,
+              child: Text(
+                '... در حال آپدیت لیست رمز ارز ها',
+                style: TextStyle(
+                    color: greenColor, fontFamily: 'moraba', fontSize: 17),
               ),
             ),
             Expanded(
@@ -175,9 +183,13 @@ class _CryptoListState extends State<CryptoList> {
   Future<void> _searchInlist(String value) async {
     //If the user clears data from the TextField, get data from the server
     if (value.isEmpty) {
+      setState(() {
+        isVisibleUpdating = true;
+      });
       List<Crypto> result = await _getData();
       setState(() {
         cryptolists = result;
+        isVisibleUpdating = false;
       });
       return;
     }
