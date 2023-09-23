@@ -39,22 +39,51 @@ class _CryptoListState extends State<CryptoList> {
       ),
       backgroundColor: blackColor,
       body: SafeArea(
-        child: RefreshIndicator(
-          color: blackColor,
-          backgroundColor: greenColor,
-          child: ListView.builder(
-            itemCount: cryptolists!.length,
-            itemBuilder: ((context, index) {
-              return _getListTile(cryptolists![index]);
-            }),
-          ),
-          onRefresh: () async {
-            // Refresh data from the API
-            List<Crypto> freshData = await _getData();
-            setState(() {
-              cryptolists = freshData;
-            });
-          },
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              //Define textfild for searching in crypto list
+              child: TextField(
+                onChanged: (value) {
+                  _searchInlist(value);
+                },
+                textAlign: TextAlign.end,
+                decoration: InputDecoration(
+                  hintText: 'نام رمز ارز خود را وارد کنید',
+                  hintStyle: TextStyle(
+                    fontFamily: 'moraba',
+                    color: Colors.white,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(width: 0.0, style: BorderStyle.none),
+                  ),
+                  filled: true,
+                  fillColor: greyColor,
+                ),
+              ),
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                color: blackColor,
+                backgroundColor: greenColor,
+                child: ListView.builder(
+                  itemCount: cryptolists!.length,
+                  itemBuilder: ((context, index) {
+                    return _getListTile(cryptolists![index]);
+                  }),
+                ),
+                onRefresh: () async {
+                  // Refresh data from the API
+                  List<Crypto> freshData = await _getData();
+                  setState(() {
+                    cryptolists = freshData;
+                  });
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -140,5 +169,26 @@ class _CryptoListState extends State<CryptoList> {
         .map<Crypto>((mapJsonObject) => Crypto.fromMapData(mapJsonObject))
         .toList();
     return cryptoList;
+  }
+
+//Function for seraching in cryptolist
+  Future<void> _searchInlist(String value) async {
+    //If the user clears data from the TextField, get data from the server
+    if (value.isEmpty) {
+      List<Crypto> result = await _getData();
+      setState(() {
+        cryptolists = result;
+      });
+      return;
+    }
+    List<Crypto> cryptoresult = [];
+    cryptoresult = cryptolists!.where((element) {
+      return element.name.toLowerCase().contains(
+            value.toLowerCase(),
+          );
+    }).toList();
+    setState(() {
+      cryptolists = cryptoresult;
+    });
   }
 }
